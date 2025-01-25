@@ -21,5 +21,8 @@
   "homepage": "https://github.com/outsideris/skyline#readme",
   "devDependencies": {
     "vite": "^6.0.3"
+  },
+  "dependencies": {
+    "three": "^0.150.0"
   }
 }
