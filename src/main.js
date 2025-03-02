@@ -1,4 +1,5 @@
 import { init3D } from './3d.js';
+import { fetchGitHubContributions } from './github.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   const usernameInput = document.getElementById('username');
@@ -18,8 +19,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const username = usernameInput.value.trim();
     if (username) {
       console.log(`GitHub username: ${username}`);
-      // 여기에 username으로 다음 작업을 수행하는 코드 추가
-      // 예: 다른 페이지로 이동하거나 GitHub API 호출 등
+      fetchGitHubContributions(username)
+        .then(data => {
+          console.log('Contribution 데이터:', data);
+          // 여기서 3D 그래프 초기화 또는 다른 처리 수행
+          // init3D(data);
+        })
+        .catch(error => {
+          alert('데이터를 가져오는 중 오류가 발생했습니다: ' + error.message);
+        });
     } else {
       alert('유효한 사용자명을 입력해주세요.');
     }
