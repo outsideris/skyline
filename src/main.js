@@ -1,24 +1,27 @@
-import './style.css'
-import javascriptLogo from './javascript.svg'
-import viteLogo from '/vite.svg'
-import { setupCounter } from './counter.js'
+import { init3D } from './3d.js';
 
-document.querySelector('#app').innerHTML = `
-  <div>
-    <a href="https://vite.dev" target="_blank">
-      <img src="${viteLogo}" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank">
-      <img src="${javascriptLogo}" class="logo vanilla" alt="JavaScript logo" />
-    </a>
-    <h1>Hello Vite!</h1>
-    <div class="card">
-      <button id="counter" type="button"></button>
-    </div>
-    <p class="read-the-docs">
-      Click on the Vite logo to learn more
-    </p>
-  </div>
-`
+document.addEventListener('DOMContentLoaded', () => {
+  const usernameInput = document.getElementById('username');
+  const submitButton = document.getElementById('submit-btn');
 
-setupCounter(document.querySelector('#counter'))
+  // Enter 키 누르면 제출
+  usernameInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      handleSubmit();
+    }
+  });
+
+  // 버튼 클릭 시 제출
+  submitButton.addEventListener('click', handleSubmit);
+
+  function handleSubmit() {
+    const username = usernameInput.value.trim();
+    if (username) {
+      console.log(`GitHub username: ${username}`);
+      // 여기에 username으로 다음 작업을 수행하는 코드 추가
+      // 예: 다른 페이지로 이동하거나 GitHub API 호출 등
+    } else {
+      alert('유효한 사용자명을 입력해주세요.');
+    }
+  }
+});
