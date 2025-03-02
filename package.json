@@ -20,6 +20,9 @@
   },
   "homepage": "https://github.com/outsideris/skyline#readme",
   "devDependencies": {
+    "@tailwindcss/vite": "^4.0.9",
+    "daisyui": "^5.0.0",
+    "tailwindcss": "^4.0.9",
     "vite": "^6.0.3"
   },
   "dependencies": {
