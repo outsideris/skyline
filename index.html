@@ -10,19 +10,40 @@
   <body class="bg-gray-100 min-h-screen">
     <div id="app" class="container mx-auto p-4">
       <h1 class="text-4xl font-bold mb-8 text-primary text-center">Skyline for GitHub</h1>
-      
+
       <div class="max-w-md mx-auto bg-white p-8 rounded-lg shadow-md mb-8">
         <div class="form-control">
           <label class="label">
             <span class="label-text text-lg">Enter GitHub username</span>
           </label>
-          <div class="flex gap-2">
+          <div class="flex gap-2 mb-4">
             <input type="text" id="username" placeholder="username" class="input input-bordered w-full" />
-            <button id="submit-btn" class="btn btn-primary">Submit</button>
+          </div>
+
+          <label class="label">
+            <span class="label-text text-lg">Date range</span>
+          </label>
+          <div class="grid grid-cols-2 gap-2 mb-4">
+            <div>
+              <label class="label">
+                <span class="label-text">From</span>
+              </label>
+              <input type="date" id="from-date" class="input input-bordered w-full" value="2024-01-01" />
+            </div>
+            <div>
+              <label class="label">
+                <span class="label-text">To</span>
+              </label>
+              <input type="date" id="to-date" class="input input-bordered w-full" value="2024-12-31" />
+            </div>
+          </div>
+
+          <div class="flex justify-center">
+            <button id="submit-btn" class="btn btn-primary w-full">Submit</button>
           </div>
         </div>
       </div>
-      
+
       <!-- 3D Visualization will be inserted here by JavaScript -->
       <div id="visualization-container" class="w-full h-[600px] relative bg-white rounded-lg shadow-lg mb-4 hidden">
       </div>

@@ -3,6 +3,8 @@ import { fetchGitHubContributions } from './github.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   const usernameInput = document.getElementById('username');
+  const fromDateInput = document.getElementById('from-date');
+  const toDateInput = document.getElementById('to-date');
   const submitButton = document.getElementById('submit-btn');
   const visualContainer = document.getElementById('visualization-container');
 
@@ -18,8 +20,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function handleSubmit() {
     const username = usernameInput.value.trim();
+    const fromDate = fromDateInput.value;
+    const toDate = toDateInput.value;
+
     if (username) {
-      console.log(`GitHub username: ${username}`);
+      console.log(`GitHub username: ${username}, From: ${fromDate}, To: ${toDate}`);
+
+      // Validate date range (GitHub API has a limit of 1 year for contributions)
+      const startDate = new Date(fromDate);
+      const endDate = new Date(toDate);
+      const diffTime = Math.abs(endDate - startDate);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      if (diffDays > 366) {
+        alert('Date range cannot exceed 1 year due to GitHub API limitations');
+        return;
+      }
 
       // Clear previous content in visualization container
       visualContainer.innerHTML = '';
@@ -31,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
       loadingDiv.className = 'loading loading-spinner loading-lg text-primary my-8 mx-auto block';
       document.getElementById('app').appendChild(loadingDiv);
 
-      fetchGitHubContributions(username)
+      fetchGitHubContributions(username, fromDate, toDate)
         .then(data => {
           console.log('Contribution data:', data);
 
@@ -45,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
           // Add user info header
           const userHeader = document.createElement('div');
           userHeader.className = 'text-xl font-semibold mb-2 p-4 bg-base-200 rounded-t-lg';
-          userHeader.textContent = `${username}'s GitHub Contribution Skyline (2024)`;
+          userHeader.textContent = `${username}'s GitHub Contribution Skyline (${fromDate} - ${toDate})`;
           visualContainer.appendChild(userHeader);
 
           // Add stats info

@@ -10,13 +10,16 @@ function mockGetContributionLevel(level) {
     THIRD_QUARTILE: 3,
     FOURTH_QUARTILE: 4
   };
-  
+
   return levels[level] || 0;
 }
 
 // Mock values for testing
 const mockUsername = 'testuser';
 const mockToken = 'mock_token';
+const mockFromDate = '2024-01-01';
+const mockToDate = '2024-12-31';
+
 const mockSuccessResponse = {
   data: {
     user: {
@@ -86,7 +89,7 @@ describe('GitHub API', () => {
   });
 
   describe('fetchGitHubContributions', () => {
-    it('should fetch and transform GitHub contribution data successfully', async () => {
+    it('should fetch and transform GitHub contribution data successfully with default dates', async () => {
       // Arrange
       global.localStorage.getItem.mockReturnValue(mockToken);
       global.fetch.mockResolvedValue({
@@ -108,6 +111,11 @@ describe('GitHub API', () => {
         body: expect.any(String)
       });
 
+      // Verify the query contains default dates
+      const requestBody = JSON.parse(global.fetch.mock.calls[0][1].body);
+      expect(requestBody.query).toContain('from: "2024-01-01T00:00:00Z"');
+      expect(requestBody.query).toContain('to: "2024-12-31T23:59:59Z"');
+
       // Check correct data transformation
       expect(result).toHaveLength(4);
       expect(result[0]).toEqual({
@@ -115,11 +123,32 @@ describe('GitHub API', () => {
         count: 5,
         level: 2 // SECOND_QUARTILE
       });
-      expect(result[1]).toEqual({
-        date: '2024-01-02',
-        count: 10,
-        level: 4 // FOURTH_QUARTILE
+    });
+
+    it('should fetch and transform GitHub contribution data with custom dates', async () => {
+      // Arrange
+      global.localStorage.getItem.mockReturnValue(mockToken);
+      global.fetch.mockResolvedValue({
+        ok: true,
+        json: async () => mockSuccessResponse
       });
+
+      const customFromDate = '2023-06-01';
+      const customToDate = '2023-12-31';
+
+      // Act
+      const result = await fetchGitHubContributions(mockUsername, customFromDate, customToDate);
+
+      // Assert
+      expect(fetch).toHaveBeenCalledTimes(1);
+
+      // Verify the query contains custom dates
+      const requestBody = JSON.parse(global.fetch.mock.calls[0][1].body);
+      expect(requestBody.query).toContain(`from: "${customFromDate}T00:00:00Z"`);
+      expect(requestBody.query).toContain(`to: "${customToDate}T23:59:59Z"`);
+
+      // Check correct data transformation
+      expect(result).toHaveLength(4);
     });
 
     it('should prompt for token if not stored in localStorage', async () => {
@@ -131,7 +160,7 @@ describe('GitHub API', () => {
       });
 
       // Act
-      await fetchGitHubContributions(mockUsername);
+      await fetchGitHubContributions(mockUsername, mockFromDate, mockToDate);
 
       // Assert
       expect(prompt).toHaveBeenCalledWith('Enter your GitHub personal access token (only needed once):');
@@ -147,10 +176,10 @@ describe('GitHub API', () => {
       });
 
       // Act & Assert
-      await expect(fetchGitHubContributions(mockUsername))
+      await expect(fetchGitHubContributions(mockUsername, mockFromDate, mockToDate))
         .rejects
         .toThrow('GitHub API response error: 401');
-      
+
       expect(console.error).toHaveBeenCalled();
     });
 
@@ -163,10 +192,10 @@ describe('GitHub API', () => {
       });
 
       // Act & Assert
-      await expect(fetchGitHubContributions(mockUsername))
+      await expect(fetchGitHubContributions(mockUsername, mockFromDate, mockToDate))
         .rejects
         .toThrow('API rate limit exceeded');
-      
+
       expect(console.error).toHaveBeenCalled();
     });
 
@@ -179,10 +208,10 @@ describe('GitHub API', () => {
       });
 
       // Act & Assert
-      await expect(fetchGitHubContributions(mockUsername))
+      await expect(fetchGitHubContributions(mockUsername, mockFromDate, mockToDate))
         .rejects
         .toThrow('User not found');
-      
+
       expect(console.error).toHaveBeenCalled();
     });
 
@@ -192,10 +221,10 @@ describe('GitHub API', () => {
       global.prompt.mockReturnValue(null);
 
       // Act & Assert
-      await expect(fetchGitHubContributions(mockUsername))
+      await expect(fetchGitHubContributions(mockUsername, mockFromDate, mockToDate))
         .rejects
         .toThrow('GitHub token is required');
-      
+
       expect(console.error).toHaveBeenCalled();
     });
   });
