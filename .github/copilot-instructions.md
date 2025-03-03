@@ -1,2 +1,4 @@
-Use only as a static website without a server
-Use JavaScript with jQuery
+- 이 프로젝트는 서버 없이 정적 페이지로 구성된 웹사이트이므로 브라우저에서 모든 기능을 구현해
+- 채팅에서 대답할 때는 항상 한국말로 대답해
+- 코드를 작성할 때는 주석이나 문구는 모두 영문으로 작성해
+- 테스트 코드는 vitest로 작성해
