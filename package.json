@@ -30,6 +30,6 @@
     "vitest": "^3.0.7"
   },
   "dependencies": {
-    "three": "^0.150.0"
+    "three": "^0.174.0"
   }
 }
