@@ -6,14 +6,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const submitButton = document.getElementById('submit-btn');
   const visualContainer = document.getElementById('visualization-container');
 
-  // Enter 키 누르면 제출
+  // Enter key to submit
   usernameInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
       handleSubmit();
     }
   });
 
-  // 버튼 클릭 시 제출
+  // Submit on button click
   submitButton.addEventListener('click', handleSubmit);
 
   function handleSubmit() {
@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       fetchGitHubContributions(username)
         .then(data => {
-          console.log('Contribution 데이터:', data);
+          console.log('Contribution data:', data);
 
           // Remove loading indicator
           const loadingEl = document.getElementById('loading');
@@ -78,11 +78,11 @@ document.addEventListener('DOMContentLoaded', () => {
           // Show error message
           const errorDiv = document.createElement('div');
           errorDiv.className = 'alert alert-error mt-4';
-          errorDiv.textContent = '데이터를 가져오는 중 오류가 발생했습니다: ' + error.message;
+          errorDiv.textContent = 'Error while fetching data: ' + error.message;
           document.getElementById('app').appendChild(errorDiv);
         });
     } else {
-      alert('유효한 사용자명을 입력해주세요.');
+      alert('Please enter a valid username.');
     }
   }
 });
