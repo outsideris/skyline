@@ -29,7 +29,11 @@ vi.mock('three', async () => {
     PerspectiveCamera: vi.fn(() => new MockCamera()),
     WebGLRenderer: vi.fn(() => new MockRenderer()),
     Color: vi.fn(),
-    GridHelper: vi.fn(),
+    Shape: vi.fn(() => ({
+      moveTo: vi.fn(),
+      lineTo: vi.fn()
+    })),
+    ExtrudeGeometry: vi.fn(),
     Group: vi.fn(() => ({
       add: vi.fn(),
       position: { set: vi.fn() }
@@ -38,6 +42,7 @@ vi.mock('three', async () => {
     MeshStandardMaterial: vi.fn(),
     Mesh: vi.fn(() => ({
       position: { set: vi.fn() },
+      rotation: { x: 0 },
       userData: {}
     })),
     AmbientLight: vi.fn(),
@@ -59,26 +64,26 @@ vi.mock('three/addons/controls/OrbitControls.js', () => ({
 describe('3D Visualization Module', () => {
   // Store original requestAnimationFrame
   const originalRAF = global.requestAnimationFrame;
-  
+
   // Mock DOM elements
   beforeEach(() => {
     document.body.innerHTML = '<div id="app"></div>';
-    
+
     // Replace requestAnimationFrame with a mock that doesn't execute the callback
     // This prevents infinite recursion
     global.requestAnimationFrame = vi.fn(cb => {
       return 1; // Just return an ID without executing the callback
     });
   });
-  
+
   // Restore original requestAnimationFrame after tests
   afterEach(() => {
     global.requestAnimationFrame = originalRAF;
-    
+
     // Remove event listeners to prevent memory leaks
     window.removeEventListener('resize', window.onresize);
   });
-  
+
   it('should initialize 3D scene with valid contribution data', () => {
     // Sample contribution data
     const mockContributions = [
@@ -90,47 +95,59 @@ describe('3D Visualization Module', () => {
       { date: '2024-01-06', count: 1, level: 1 },
       { date: '2024-01-07', count: 0, level: 0 }
     ];
-    
+
     // Initialize 3D
     const result = init3D(mockContributions);
-    
+
     // Verify 3D scene was initialized
     expect(result).toBeDefined();
     expect(result.scene).toBeDefined();
     expect(result.scene.add).toBeDefined();  // Check for scene methods instead of instanceof
     expect(result.camera).toBeDefined();
     expect(result.renderer).toBeDefined();
-    
+
     // Check if canvas was appended to DOM
     const canvas = document.querySelector('canvas');
     expect(canvas).toBeTruthy();
+
+    // Verify rectangular base with sloped edges was created
+    expect(THREE.Shape).toHaveBeenCalled();
+    expect(THREE.ExtrudeGeometry).toHaveBeenCalled();
   });
-  
+
   it('should handle empty contribution data', () => {
     // Initialize with empty data
     const result = init3D([]);
-    
+
     // Verify 3D scene was still initialized
     expect(result).toBeDefined();
     expect(result.scene).toBeDefined();
     expect(result.scene.add).toBeDefined();
-    
+
     // Check if canvas was appended to DOM
     const canvas = document.querySelector('canvas');
     expect(canvas).toBeTruthy();
+
+    // Verify rectangular base with sloped edges was still created
+    expect(THREE.Shape).toHaveBeenCalled();
+    expect(THREE.ExtrudeGeometry).toHaveBeenCalled();
   });
-  
+
   it('should handle null or undefined contribution data', () => {
     // Initialize with null data
     const result = init3D(null);
-    
+
     // Verify 3D scene was still initialized
     expect(result).toBeDefined();
     expect(result.scene).toBeDefined();
     expect(result.scene.add).toBeDefined();
-    
+
     // Check if canvas was appended to DOM
     const canvas = document.querySelector('canvas');
     expect(canvas).toBeTruthy();
+
+    // Verify rectangular base with sloped edges was still created
+    expect(THREE.Shape).toHaveBeenCalled();
+    expect(THREE.ExtrudeGeometry).toHaveBeenCalled();
   });
 });

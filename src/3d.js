@@ -41,14 +41,14 @@ export function init3D(contributionData) {
   // Add lights
   addLights();
 
-  // Add grid helper
-  const gridHelper = new THREE.GridHelper(50, 50);
-  scene.add(gridHelper);
-
-  // Create contribution visualization
+  // Create contribution visualization first to get dimensions
+  let contributionDimensions = { width: 0, depth: 0 };
   if (contributionData && contributionData.length > 0) {
-    createContributionGraph(contributionData);
+    contributionDimensions = createContributionGraph(contributionData);
   }
+
+  // Add rectangular floor with sloped sides based on contribution graph dimensions
+  addRectangularBaseWithSlopedEdges(contributionDimensions);
 
   // Handle window resize
   window.addEventListener('resize', onWindowResize);
@@ -76,8 +76,61 @@ function addLights() {
 }
 
 /**
+ * Add rectangular base with sloped edges to the scene
+ * @param {Object} dimensions - Width and depth dimensions for the base
+ */
+function addRectangularBaseWithSlopedEdges(dimensions = { width: 0, depth: 0 }) {
+  // Create a custom shape for the base (top view)
+  const shape = new THREE.Shape();
+
+  // Dimensions - use contribution graph dimensions plus a small margin
+  // If no contributions, use default size
+  const margin = 2;
+  const width = dimensions.width > 0 ? dimensions.width + margin : 30;
+  const depth = dimensions.depth > 0 ? dimensions.depth + margin : 10;
+  const slopeWidth = 2;  // Width of the sloped edge (reduced from 5)
+
+  // Define points for the top face (clockwise)
+  shape.moveTo(-width/2, -depth/2);               // Bottom-left
+  shape.lineTo(width/2, -depth/2);                // Bottom-right
+  shape.lineTo(width/2, depth/2);                 // Top-right
+  shape.lineTo(-width/2, depth/2);                // Top-left
+  shape.lineTo(-width/2, -depth/2);               // Back to start
+
+  // Extrusion settings with bevel to create sloped edges
+  const extrudeSettings = {
+    steps: 1,
+    depth: 1.5,                  // Thickness of the base (reduced from 2)
+    bevelEnabled: true,          // Enable bevels for sloped sides
+    bevelThickness: 1.5,         // How far the bevel extends (reduced from 2)
+    bevelSize: slopeWidth,       // Distance from the original shape outline
+    bevelOffset: 0,              // How far from the shape outline the bevel starts
+    bevelSegments: 1             // Number of bevel segments (keep low for flat slopes)
+  };
+
+  // Create geometry and material
+  const geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
+  const material = new THREE.MeshStandardMaterial({
+    color: 0xd0d0d0,
+    metalness: 0.2,
+    roughness: 0.8,
+    side: THREE.DoubleSide
+  });
+
+  // Create mesh
+  const floor = new THREE.Mesh(geometry, material);
+
+  // Rotate so it's flat on the ground and position it
+  floor.rotation.x = Math.PI / 2;  // Rotate to be horizontal
+  floor.position.y = -3;           // Position below the contribution cubes
+
+  scene.add(floor);
+}
+
+/**
  * Create 3D visualization of the contribution data
  * @param {Array} contributionData - Array of GitHub contribution data
+ * @returns {Object} Dimensions of the contribution graph
  */
 function createContributionGraph(contributionData) {
   // Group data by week (7 days)
@@ -149,9 +202,19 @@ function createContributionGraph(contributionData) {
     });
   });
 
+  // Calculate dimensions of the contribution graph
+  const graphWidth = weeks.length * 1.1;
+  const graphDepth = 7 * 1.1; // 7 days per week
+
   // Center the contribution graph in the scene
   contributionGroup.position.set(-weeks.length * 0.55, 0, -3.5);
   scene.add(contributionGroup);
+
+  // Return dimensions for the base plate
+  return {
+    width: graphWidth,
+    depth: graphDepth
+  };
 }
 
 /**
